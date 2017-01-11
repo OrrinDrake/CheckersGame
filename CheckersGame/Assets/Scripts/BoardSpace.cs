@@ -5,6 +5,8 @@ using UnityEngine;
 public class BoardSpace : MonoBehaviour
 {
     public float xcoord, zcoord;
+    public GameObject JumpedOver;
+
 	// Use this for initialization
 	void Start ()
     {
