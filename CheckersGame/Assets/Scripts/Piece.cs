@@ -3,15 +3,15 @@ using System.Collections;
 
 public class Piece : MonoBehaviour {
 
-    private int _playerId;
+    //private int _playerId;
     private bool _isCaptured;
     private bool _isKing;
 
-    public int PlayerId
-    {
-        get { return _playerId; }
-        set { _playerId = value; }
-    }
+    //public int PlayerId
+    //{
+    //    get { return _playerId; }
+    //    set { _playerId = value; }
+    //}
 
     public bool IsCaptured
     {
@@ -28,20 +28,27 @@ public class Piece : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-	    if(name == "WhitePiece")
-        {
-            PlayerId = 1;
-        }
-        else
-        {
-            PlayerId = 2;
-        }
-	}	
-	// Update is called once per frame
-	void Update ()
-    {
-	
+	    //if(name == "WhitePiece")
+     //   {
+     //       PlayerId = 1;
+     //   }
+     //   else
+     //   {
+     //       PlayerId = 2;
+     //   }
 	}
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    void OnMouseDown()
+    {
+        var script = GameObject.Find("GameController").GetComponent<GameController>();
+        script.SelectPiece(gameObject);
+    }
 
 
 }

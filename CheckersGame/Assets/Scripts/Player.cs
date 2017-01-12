@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
     public int Orientation;
 	// Use this for initialization
 	void Start () {
-        pieces = new List<GameObject>();
+        
     }
 	
 	// Update is called once per frame
