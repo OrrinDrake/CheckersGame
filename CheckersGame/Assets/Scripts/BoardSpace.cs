@@ -4,18 +4,50 @@ using UnityEngine;
 
 public class BoardSpace : MonoBehaviour
 {
-    public float xcoord, zcoord;
-    public GameObject JumpedOver;
+    public GameObject JumpedPiece;
 
-	// Use this for initialization
-	void Start ()
+    private Vector3 _initialPoint;
+    private bool _alreadyTriggered;
+
+    void Start()
     {
-        xcoord = transform.position.x;
-        zcoord = transform.position.z;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        _alreadyTriggered = false;
+    }
+    
+    void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Enter " + gameObject.name + " and " + other.gameObject.name);
+        if(_alreadyTriggered)
+        {
+            _alreadyTriggered = false;
+            gameObject.SetActive(false);
+            JumpedPiece = null;
+        }
+        else
+        {
+            JumpedPiece = other.gameObject;
+            _alreadyTriggered = true; 
+
+            float deltaX = _initialPoint.x - gameObject.transform.position.x;
+            float deltaZ = _initialPoint.z - gameObject.transform.position.z;
+            Vector3 nextPos = new Vector3(_initialPoint.x + deltaX, 0, _initialPoint.z + deltaZ);
+           
+            gameObject.transform.position = nextPos;
+            gameObject.SetActive(true);
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        //Not what i need for consecutive collision
+        Debug.Log("Stay " + gameObject.name + " and " + other.gameObject.name);
+    }
+
+
+    public void MoveTo(Vector3 pos)
+    {
+        gameObject.SetActive(true);
+        _initialPoint = pos;
+        gameObject.transform.position = pos;
+    }
 }
