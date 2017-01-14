@@ -4,51 +4,45 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
-    private GameObject SelectedPiece;
-    private Player Player1, Player2;
-    private Player _activePlayer, _inactivePlayer;
     public GameObject Space1, Space2, Space3, Space4;
+
+    private GameObject SelectedPiece;
+    private Player _activePlayer, _inactivePlayer;
 
     void Start()
     {
-        Player1 = gameObject.AddComponent<Player>();
-        Player2 = gameObject.AddComponent<Player>();
+        _activePlayer = gameObject.AddComponent<Player>();
+        _inactivePlayer = gameObject.AddComponent<Player>();
 
-        Player1.pieces = GameObject.FindGameObjectsWithTag("White").ToList();
-        Player2.pieces = GameObject.FindGameObjectsWithTag("Black").ToList();
+        _activePlayer.pieces = GameObject.FindGameObjectsWithTag("White").ToList();
+        _inactivePlayer.pieces = GameObject.FindGameObjectsWithTag("Black").ToList();
 
-        Player1.Orientation = -1;
-        Player2.Orientation = 1;
-        _activePlayer = Player1;
-        _inactivePlayer = Player2;
+        _activePlayer.Orientation = -1;
+        _inactivePlayer.Orientation = 1;
 
         HideSpaces();
     }
     
     private void Hide(GameObject gameobj)
     {
-        gameobj.gameObject.SetActive(false);
-    }
-
-    private void Show(GameObject gameobj)
-    {
-        gameobj.gameObject.SetActive(true);
+        gameobj.GetComponent<BoardSpace>().Deactivate();
     }
 
     private void HideSpaces()
     {
-        Hide(Space1);
-        Hide(Space2);
-        Hide(Space3);
-        Hide(Space4);
+        Space1.GetComponent<BoardSpace>().Deactivate();
+        Space2.GetComponent<BoardSpace>().Deactivate();
+        Space3.GetComponent<BoardSpace>().Deactivate();
+        Space4.GetComponent<BoardSpace>().Deactivate();
     }
 
     public void SelectPiece(GameObject piece)
     {
+        HideSpaces();
+
         if ((SelectedPiece != null && SelectedPiece.Equals(piece)) || _inactivePlayer.pieces.Contains(piece))
         {
             SelectedPiece = null;
-            HideSpaces();
         }
         else
         {
@@ -66,13 +60,13 @@ public class GameController : MonoBehaviour
         do
         {
             Vector3 spacePos = new Vector3(piecePos.x + 1, 0, piecePos.z + _activePlayer.Orientation * direction);
-            if (IsOnBoard(spacePos))
-                spaces[i].GetComponent<BoardSpace>().MoveTo(spacePos);
+            if (IsOnBoard((int)spacePos.x, (int)spacePos.z))
+                spaces[i].GetComponent<BoardSpace>().Move(piecePos, spacePos);
             i++;
 
             spacePos = new Vector3(piecePos.x - 1, 0, piecePos.z + _activePlayer.Orientation * direction);
-            if (IsOnBoard(spacePos))
-                spaces[i].GetComponent<BoardSpace>().MoveTo(spacePos);
+            if (IsOnBoard((int)spacePos.x, (int)spacePos.z))
+                spaces[i].GetComponent<BoardSpace>().Move(piecePos, spacePos);
             i++;
 
             direction = -1;
@@ -81,9 +75,14 @@ public class GameController : MonoBehaviour
 
     }
 
-    private bool IsOnBoard(Vector3 pos)
+    private bool IsOnBoard(int posX, int posZ)
     {
-        return (pos.x >= 0 && pos.x <= 7) && (pos.z >= 0 && pos.z <= 7);
+        return (posX >= 0 && posX <= 7) && (posZ >= 0 && posZ <= 7);
+    }
+
+    public bool IsActivePlayerPiece(GameObject piece)
+    {
+        return _activePlayer.pieces.Contains(piece);
     }
 
     //private void CheckSpace(GameObject spaceObj, Vector3 piecePos)

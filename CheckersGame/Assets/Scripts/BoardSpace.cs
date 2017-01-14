@@ -7,47 +7,56 @@ public class BoardSpace : MonoBehaviour
     public GameObject JumpedPiece;
 
     private Vector3 _initialPoint;
-    private bool _alreadyTriggered;
+    private bool _firstTrigger;
 
     void Start()
     {
-        _alreadyTriggered = false;
+        _firstTrigger = true;
     }
     
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Enter " + gameObject.name + " and " + other.gameObject.name);
-        if(_alreadyTriggered)
+        Debug.Log(gameObject.name + " triggered " + other.gameObject.name);
+        var gameController = FindObjectOfType<GameController>().GetComponent<GameController>();
+
+        if (_firstTrigger && !gameController.IsActivePlayerPiece(other.gameObject))
         {
-            _alreadyTriggered = false;
-            gameObject.SetActive(false);
-            JumpedPiece = null;
+            _firstTrigger = false;
+            JumpedPiece = other.gameObject;
+            gameObject.SetActive(true);
+
+            float deltaX = gameObject.transform.position.x - _initialPoint.x;
+            float deltaZ = gameObject.transform.position.z - _initialPoint.z;
+            Vector3 nextPos = new Vector3(gameObject.transform.position.x + deltaX, 0, gameObject.transform.position.z + deltaZ);
+
+            gameObject.transform.position = nextPos;
         }
         else
         {
-            JumpedPiece = other.gameObject;
-            _alreadyTriggered = true; 
-
-            float deltaX = _initialPoint.x - gameObject.transform.position.x;
-            float deltaZ = _initialPoint.z - gameObject.transform.position.z;
-            Vector3 nextPos = new Vector3(_initialPoint.x + deltaX, 0, _initialPoint.z + deltaZ);
-           
-            gameObject.transform.position = nextPos;
-            gameObject.SetActive(true);
+            Deactivate();
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    public void Move(Vector3 piece, Vector3 space)
     {
-        //Not what i need for consecutive collision
-        Debug.Log("Stay " + gameObject.name + " and " + other.gameObject.name);
+        gameObject.transform.position = space;
+        _initialPoint = piece;
+        Activate();
     }
 
-
-    public void MoveTo(Vector3 pos)
+    public void Deactivate()
     {
+        JumpedPiece = null;
+        _firstTrigger = false;
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// To be called after the BoardSpace game object is moved to its initail position.
+    /// </summary>
+    public void Activate()
+    {
+        _firstTrigger = true;
         gameObject.SetActive(true);
-        _initialPoint = pos;
-        gameObject.transform.position = pos;
     }
 }
