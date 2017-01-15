@@ -5,31 +5,47 @@ using UnityEngine;
 public class BoardSpace : MonoBehaviour
 {
     public GameObject JumpedPiece;
+    public bool selectable;
+    public bool isKingSpace;
 
-    private Vector3 _initialPoint;
+    private Vector3 _piecePos;
     private bool _firstTrigger;
+    //private bool _jumpsOnly;
 
     void Start()
     {
         _firstTrigger = true;
+        selectable = true;
+        //_jumpsOnly = false;
     }
     
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log(gameObject.name + " triggered " + other.gameObject.name);
         var gameController = FindObjectOfType<GameController>().GetComponent<GameController>();
 
         if (_firstTrigger && !gameController.IsActivePlayerPiece(other.gameObject))
         {
+            //if(_jumpsOnly)
+            if(gameController.jumpsOnly)
+            {
+                gameObject.GetComponent<MeshRenderer>().enabled = true;
+                selectable = true;
+            }
+
             _firstTrigger = false;
             JumpedPiece = other.gameObject;
             gameObject.SetActive(true);
 
-            float deltaX = gameObject.transform.position.x - _initialPoint.x;
-            float deltaZ = gameObject.transform.position.z - _initialPoint.z;
+            float deltaX = gameObject.transform.position.x - _piecePos.x;
+            float deltaZ = gameObject.transform.position.z - _piecePos.z;
             Vector3 nextPos = new Vector3(gameObject.transform.position.x + deltaX, 0, gameObject.transform.position.z + deltaZ);
 
-            gameObject.transform.position = nextPos;
+            isKingSpace = gameController.IsOnKingSpace((int)nextPos.z);
+
+            if (FindObjectOfType<GameController>().GetComponent<GameController>().IsOnBoard((int)nextPos.x, (int)nextPos.z))
+                gameObject.transform.position = nextPos;
+            else
+                Deactivate();
         }
         else
         {
@@ -37,10 +53,19 @@ public class BoardSpace : MonoBehaviour
         }
     }
 
+    void OnMouseDown()
+    {
+        //if(!(_jumpsOnly && !selectable))
+        if(selectable)
+        {
+            FindObjectOfType<GameController>().GetComponent<GameController>().MoveSelected(this);
+        }
+    }
+
     public void Move(Vector3 piece, Vector3 space)
     {
         gameObject.transform.position = space;
-        _initialPoint = piece;
+        _piecePos = piece;
         Activate();
     }
 
@@ -48,6 +73,7 @@ public class BoardSpace : MonoBehaviour
     {
         JumpedPiece = null;
         _firstTrigger = false;
+        //_jumpsOnly = true;
         gameObject.SetActive(false);
     }
 
@@ -57,6 +83,8 @@ public class BoardSpace : MonoBehaviour
     public void Activate()
     {
         _firstTrigger = true;
+        //_jumpsOnly = false;
         gameObject.SetActive(true);
     }
+    
 }
